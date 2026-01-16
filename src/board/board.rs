@@ -1,6 +1,6 @@
 // pub mod board_manager;
 // use board_manager::BoardManager;
-use super::types::{Coordinate, Coordinates, Index};
+use super::types::{Coordinate, Coordinates};
 use super::board_manager::BoardManager;
 use std::rc::Rc;
 
@@ -35,7 +35,17 @@ impl Board {
         Board { pos: vec![false; BoardManager::array_size(n) ], mgr: board_mgr}
     }
 
-    fn from_string(s: &str) -> Option<Board>
+    pub fn count_pegs(&self) -> usize
+    {
+        self.pos.iter().filter(|p| **p).count()
+    }
+
+    pub fn is_finished(&self) -> bool
+    {
+        [0, 1].contains(&self.count_pegs())
+    }
+
+    pub fn from_string(s: &str) -> Option<Board>
     {
         let without_spaces : String = s.chars().filter(|c| !c.is_whitespace() && (*c == 'O' || *c == 'X')).collect();
 
@@ -113,12 +123,7 @@ impl Board {
                         match self.get(s) { Some(false) => Some(*s), _ => None })                    
                 };
 
-            let left_coords = 
-                match coords
-                {
-                    (x , y) => (0..coords.0).rev().map(|x| (x, *y)).collect(),
-                    _ => vec![]
-                };
+            let left_coords = (0..coords.0).rev().map(|x| (x, coords.1)).collect();
 
             let found = find(left_coords);
 
@@ -141,12 +146,7 @@ impl Board {
                 result.push((x, y));
             }            
 
-             let up_coords = 
-                match coords
-                {
-                    (x , y) if *y > 0 => (0..coords.0).rev().map(|y| (*x, y)).collect(),
-                    _ => vec![]
-                };
+             let up_coords =  (0..coords.0).rev().map(|y| (coords.0, y)).collect();
 
             let found = find(up_coords);
 
@@ -245,6 +245,30 @@ mod tests {
 
         assert_eq!(b.get(&(1, 3)), Some(false));
         assert_eq!(b.get(&(2, 3)), Some(true));
+    }
+
+    #[test]
+    fn count_pegs_is_successfull()
+    {
+        let s =  "O O
+                      O O X X
+                      O O O X
+                        O X";
+
+        let mut b = Board::from_string(s).unwrap();
+        assert_eq!(b.count_pegs(), 4);
+        assert_eq!(b.is_finished(), false);
+
+        b.set_all(true);
+        assert_eq!(b.count_pegs(), 12);
+
+        b.set_all(false);
+        assert_eq!(b.count_pegs(), 0);
+        assert_eq!(b.is_finished(), true);
+
+        b.set(&(1, 1), true);
+        assert_eq!(b.is_finished(), true);
+
     }
 
     #[test]

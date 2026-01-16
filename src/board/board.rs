@@ -35,6 +35,19 @@ impl Board {
         Board { pos: vec![false; BoardManager::array_size(n) ], mgr: board_mgr}
     }
 
+    fn from_string(s: &str) -> Option<Board>
+    {
+        let without_spaces : String = s.chars().filter(|c| !c.is_whitespace() && (*c == 'O' || *c == 'X')).collect();
+
+        if let Some(n) = BoardManager::n_from_array_size(without_spaces.len())
+        {
+            let v : Vec<bool> = without_spaces.chars().map(|c| match c { 'X' => true, _ => false }).collect();
+            let mgr = Rc::new(BoardManager::new(n));
+            return Some(Board{ pos : v, mgr : mgr});
+        }
+        None
+    }
+
     pub fn get_board_manager(&self) -> Rc<BoardManager>
     {
         self.mgr.clone()
@@ -89,12 +102,21 @@ impl Board {
         if let Some(v) = self.get(coords) && v // is there really a stick?
         {
             // function to find a first position in a continuous sequence that has no peg
-            let find = |c:  Vec<(u8, u8)>| c.iter().find_map(|s| match self.get(s) { Some(false) => Some(*s), _ => None });
+            // Except the first peg in that direction. If that has no peg, no move possible
+            let find = |c:  Vec<(u8, u8)>| 
+                if !c.is_empty() && self.get(&c[0]) == Some(false)
+                {
+                    None
+                }
+                else {
+                    c.iter().find_map(|s| 
+                        match self.get(s) { Some(false) => Some(*s), _ => None })                    
+                };
 
             let left_coords = 
                 match coords
                 {
-                    (x , y) if *x > 0 => (0..coords.0).rev().map(|x| (x, *y)).collect(),
+                    (x , y) => (0..coords.0).rev().map(|x| (x, *y)).collect(),
                     _ => vec![]
                 };
 
@@ -196,6 +218,34 @@ impl Board {
 #[cfg(test)]
 mod tests {
     use super::*;
+    
+    #[test]
+    fn from_string_is_successful()
+    {
+        let s =  "O O
+                      O O X X
+                      O O O X
+                        O X";
+
+        let b = Board::from_string(s).unwrap();
+
+        assert_eq!(b.get_board_manager().n(), 2);
+        assert_eq!(b.get(&(1, 0)), Some(false));
+        assert_eq!(b.get(&(2, 0)), Some(false));
+
+        assert_eq!(b.get(&(0, 1)), Some(false));
+        assert_eq!(b.get(&(1, 1)), Some(false));
+        assert_eq!(b.get(&(2, 1)), Some(true));
+        assert_eq!(b.get(&(3, 1)), Some(true));
+
+        assert_eq!(b.get(&(0, 2)), Some(false));
+        assert_eq!(b.get(&(1, 2)), Some(false));
+        assert_eq!(b.get(&(2, 2)), Some(false));
+        assert_eq!(b.get(&(3, 2)), Some(true));
+
+        assert_eq!(b.get(&(1, 3)), Some(false));
+        assert_eq!(b.get(&(2, 3)), Some(true));
+    }
 
     #[test]
     fn new_initializes_all_positions_false() {
@@ -409,6 +459,22 @@ mod tests {
         assert_eq!(b.get(&(1, 6)), None);
         assert_eq!(b.get(&(5, 6)), None);
         assert_eq!(b.get(&(6, 6)), None);        
+    }
+
+    #[test]
+    fn move_01()
+    {
+        let s = 
+         "O O
+        X O X X
+        O O O O
+          X O";
+
+        let b = Board::from_string(s).unwrap();
+        let moves = b.get_all_possible_moves();
+
+        println!("{:?}", moves);
+        assert_eq!(moves.len(), 1);
     }
 
 }

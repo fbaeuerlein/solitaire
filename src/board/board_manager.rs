@@ -1,6 +1,8 @@
 
+use num_integer::Roots;
+
 use super::types::{Coordinates, Index};
-use std::collections::HashMap;
+use std::{collections::HashMap};
 
 pub struct BoardManager
 {
@@ -70,12 +72,29 @@ impl BoardManager
         }
     }
 
+    // 0 = 5n^2 -4n - a
+    // (4 +/- sqrt(16 + 20a))/ 10 
+    pub fn n_from_array_size(a : usize) -> Option<u8>
+    {
+        let d = 16 + 20 * a;
+        let d_sqrt: usize = d.sqrt();
+
+        if d_sqrt.pow(2) == d
+        {
+            let r = 4 + d_sqrt;
+            if r % 10 == 0 
+            {
+                return Some((r / 10) as u8);
+            }
+        }
+        
+        None
+    }
+
     pub fn n(&self) -> u8
     {
         self.n
     }
-
-
 
     pub fn size(&self) -> usize
     {
@@ -107,6 +126,15 @@ mod tests {
     5     * * *
     6     * * *
     */
+    #[test]
+    fn get_n_from_array_size_is_working() {
+
+        assert_eq!(BoardManager::n_from_array_size(12), Some(2));
+        assert_eq!(BoardManager::n_from_array_size(33), Some(3));
+    
+        assert_eq!(BoardManager::n_from_array_size(0), None);
+    }
+
 
     #[test]
     fn n_is_set_correctly() {

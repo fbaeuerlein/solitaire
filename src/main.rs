@@ -12,23 +12,22 @@ fn solve(b : &Board, m : &Move)
 {
     let mut n = b.clone();
     n.apply_move(m);
-    println!("================================");
-    println!("{:?}", m);
-    n.print();
+    // println!("================================");
+    // println!("{:?}", m);
+    // n.print();
     let moves = n.get_all_possible_moves();
     for next_move in moves
     {
         solve(&n, &next_move);
     }
-
 }
 
 fn main() {
-    let mgr = Rc::new(BoardManager::new(2));
+    let mgr = Rc::new(BoardManager::new(3));
     let mut b = Board::new(mgr);
 
     b.set_all(true);
-    b.set(&(2, 2), false);
+    b.set(&(3, 3), false);
 
     let moves = b.get_all_possible_moves();
     println!("{:?}", moves);

@@ -14,6 +14,8 @@ impl Game {
 
     pub fn play(&self)
     {
+        println!("Starting with\n=====================================");
+        self.initial_board.print();
         let moves = self.initial_board.get_all_possible_moves();
         for m in moves
         {
@@ -64,4 +66,15 @@ mod tests {
         g.play();   
     }
 
+    #[test]
+    fn play_game_02()
+    {
+        let s =  "X X
+                      X X X X
+                      X X O X
+                        X X";
+        let g = Game::from_string(s).unwrap();
+
+        g.play();   
+    }
 }

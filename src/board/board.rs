@@ -89,19 +89,30 @@ impl Board {
 
     pub fn print(&self)
     {
-        for x in 0..=7 as Coordinate
+        println!("{}", self.into_string());
+    }
+
+    pub fn into_string(&self) -> String
+    {
+        let mut result = String::new();
+        let size = self.mgr.size();
+
+        for y in 0..size as Coordinate // lines
         {
-            for y in 0..=7 as Coordinate
+            for x in 0..size as Coordinate // cols
             {
                 match self.get(&(x, y))
                 {
-                    Some(v) => if v { print!("X"); } else { print!("O"); },
-                    None => print!(" ") 
+                    Some(v) => if v {result.push('X'); } else { result.push('O'); },
+                    None => result.push(' ')
                 }
-                print!(" ")
+                result.push(' ');
             }
-            println!("")
+            result.push('\n');
         }
+
+        result
+
     }
 
     pub fn get_possible_moves(&self, coords: &Coordinates) -> Vec<Coordinates>
@@ -146,7 +157,7 @@ impl Board {
                 result.push((x, y));
             }            
 
-             let up_coords =  (0..coords.0).rev().map(|y| (coords.0, y)).collect();
+            let up_coords =  (0..coords.1).rev().map(|y| (coords.0, y)).collect();
 
             let found = find(up_coords);
 
@@ -245,6 +256,20 @@ mod tests {
 
         assert_eq!(b.get(&(1, 3)), Some(false));
         assert_eq!(b.get(&(2, 3)), Some(true));
+    }
+
+        #[test]
+    fn to_string_is_successful()
+    {
+        let s =  
+"  O O   
+O O X X 
+O O O X 
+  O X   
+";
+
+        let b = Board::from_string(s).unwrap();
+        assert_eq!(b.into_string(), s);
     }
 
     #[test]
@@ -486,20 +511,19 @@ mod tests {
     }
 
     #[test]
-    fn move_01()
+    fn possible_moves_01()
     {
-        let s = 
-         "O O
-        X O X X
-        O O O O
-          X O";
+        let s =  "O O
+                      O O O O
+                      O X O X
+                        X X";
 
-        let b = Board::from_string(s).unwrap();
-        let moves = b.get_all_possible_moves();
-
-        println!("{:?}", moves);
-        assert_eq!(moves.len(), 1);
+        let mut b = Board::from_string(s).unwrap();
+        let m = b.get_all_possible_moves();
+        assert_eq!(m.len(), 1);
+        assert!(m.contains(&Move { start: (1, 3), end: (1, 1) }));
     }
+
 
 }
 

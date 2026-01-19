@@ -10,6 +10,14 @@ pub struct Move {
     end: Coordinates,
 }
 
+impl Move
+{
+    pub fn new(start: Coordinates, end: Coordinates) -> Self
+    {
+        Move { start, end }
+    }
+}
+
 #[derive(Clone)]
 pub struct Board
 {
@@ -518,12 +526,27 @@ O O O X
                       O X O X
                         X X";
 
-        let mut b = Board::from_string(s).unwrap();
+        let b = Board::from_string(s).unwrap();
         let m = b.get_all_possible_moves();
         assert_eq!(m.len(), 1);
         assert!(m.contains(&Move { start: (1, 3), end: (1, 1) }));
     }
 
+    #[test]
+    fn possible_moves_02()
+    {
+        let s = 
+        "X X
+       X X X X
+       X X O X
+         X X";
+
+        let b = Board::from_string(s).unwrap();
+        let m = b.get_all_possible_moves();
+        assert_eq!(m.len(), 2);
+        assert!(m.contains(&Move { start: (2, 0), end: (2, 2) }), "{:?}", m);
+        assert!(m.contains(&Move { start: (0, 2), end: (2, 2) }), "{:?}", m);
+    }
 
 }
 

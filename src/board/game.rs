@@ -6,44 +6,68 @@ pub struct Game
     initial_board: Board,
 }
 
+
 impl Game {
     pub fn from_string(s : &str) -> Option<Self>
     {
         Board::from_string(s).map(|b| Game{initial_board : b})
     }
 
-    pub fn play(&self)
+    pub fn play(&self) -> Option<Vec<Move>>
     {
         println!("Starting with\n=====================================");
         self.initial_board.print();
         let moves = self.initial_board.get_all_possible_moves();
+        let mut result = Vec::new();
         for m in moves
         {
-            self.solve(&self.initial_board, &m);
+            let v = self.solve(&self.initial_board, &m);
+            if !v.is_empty()
+            {
+                result = v;
+                result.reverse();
+                break;
+            }
+  
         }
+        match result.is_empty() {
+            true => None,
+            false => Some(result)
+        }
+        
     }
 
-    fn solve(&self, b : &Board, next_move : &Move ) -> Option<Move>
+    fn solve(&self, b : &Board, next_move : &Move ) -> Vec<Move>
     {
         let mut n = b.clone();
-        println!("{:?}\n=====================================", next_move);
-        b.print();
+        // println!("{:?}\n=====================================", next_move);
+        // b.print();
         n.apply_move(next_move);
 
-        if b.is_finished()
+        if n.is_finished()
         {
-            Some(*next_move)
+            vec![*next_move]
         }
         else 
         {    
             let moves = n.get_all_possible_moves();
             if moves.is_empty()
             {
-                None
+                vec![]
             }
             else
             { 
-                moves.iter().map(|m| self.solve(&n, m)).find(|m| m.is_some()).flatten()
+                // moves.iter().map(|m| self.solve(&n, m)).any(|v| v)
+                for m in moves
+                {
+                    let mut v = self.solve(&n, &m);
+                    if !v.is_empty()
+                    {
+                        v.push(*next_move);
+                        return v;
+                    }
+                }
+                vec![]
             }
         }
     }
@@ -59,11 +83,13 @@ mod tests {
     {
         let s =  "O O
                       O O X X
-                      O O O X
-                        O X";
+                      O O O O
+                        O O";
         let g = Game::from_string(s).unwrap();
 
-        g.play();   
+        let moves = g.play().unwrap();
+
+        assert!(moves.contains(&Move::new( (3, 1),(1, 1))));
     }
 
     #[test]
@@ -75,6 +101,40 @@ mod tests {
                         X X";
         let g = Game::from_string(s).unwrap();
 
-        g.play();   
+        let m = g.play();
+
+        println!("Moves: {:?}", m);
+    }
+
+    #[test]
+    fn play_game_03()
+    {
+        let s =  "O O
+                      O O X X
+                      O X O O
+                        O O";
+        let g = Game::from_string(s).unwrap();
+
+        let moves = g.play().unwrap();
+        assert!(moves.contains(&Move::new( (3, 1), (1, 1))));
+        assert!(moves.contains(&Move::new( (1, 1), (1, 3))));
+    }
+
+    #[test]
+    fn play_game_04()
+    {
+        let s =  "X X X
+                        X X X
+                    X X X X X X X 
+                    X X X O X X X
+                    X X X X X X X
+                        X X X
+                        X X X";
+
+        let g = Game::from_string(s).unwrap();
+
+        let m = g.play();
+
+        println!("Moves: {:?}", m);
     }
 }

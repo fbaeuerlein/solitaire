@@ -3,5 +3,17 @@ name = "solitaire"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+name = "lib"
+path = "src/lib/mod.rs"
+
 [dependencies]
 num-integer = "0.1"
+
+[dev-dependencies]
+criterion = { version = "0.7", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmark"
+harness = false
+

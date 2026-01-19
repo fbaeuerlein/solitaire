@@ -1,11 +1,9 @@
 use super::board::{Board, Move};
-//use std::rc::Rc;
 
 pub struct Game
 {
     initial_board: Board,
 }
-
 
 impl Game {
     pub fn from_string(s : &str) -> Option<Self>
@@ -15,8 +13,8 @@ impl Game {
 
     pub fn play(&self) -> Option<Vec<Move>>
     {
-        println!("Starting with\n=====================================");
-        self.initial_board.print();
+        // println!("Starting with\n=====================================");
+        // self.initial_board.print();
         let moves = self.initial_board.get_all_possible_moves();
         let mut result = Vec::new();
         for m in moves
@@ -34,7 +32,21 @@ impl Game {
             true => None,
             false => Some(result)
         }
-        
+    }
+
+    fn print(&self, moves: &Vec<Move>)
+    {
+        println!("Starting with: ");
+        self.initial_board.print();
+
+        let mut b = self.initial_board.clone();
+        for m in moves
+        {
+            println!("====================================================");
+            println!("{:?} => ", m);
+            b.apply_move(m);
+            b.print();
+        }
     }
 
     fn solve(&self, b : &Board, next_move : &Move ) -> Vec<Move>
@@ -135,6 +147,6 @@ mod tests {
 
         let m = g.play();
 
-        println!("Moves: {:?}", m);
+        g.print(&m.unwrap());
     }
 }

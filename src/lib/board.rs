@@ -142,14 +142,30 @@ impl Board {
                         match self.get(s) { Some(false) => Some(*s), _ => None })                    
                 };
 
-            let left_coords = (0..coords.0).rev().map(|x| (x, coords.1)).collect();
-
-            let found = find(left_coords);
-
-            if let Some((x, y)) = found && x + 1 != coords.0
+            for x in (0..coords.0).rev()
             {
-                result.push((x, y));
+                if let Some(peg) = self.get(&(x, coords.1))
+                {
+                    if !peg 
+                    {
+                        if x + 1 == coords.0 
+                        {
+                            break;
+                        }
+                        else {
+                            result.push((x, coords.1));
+                        }
+                    }
+                }
+                else {
+                    break;
+                }
             }
+
+            // if let Some((x, y)) = found && x + 1 != coords.0
+            // {
+            //     result.push((x, y));
+            // }
 
             let right_coords = 
                 match coords

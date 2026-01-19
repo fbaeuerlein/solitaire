@@ -1,6 +1,5 @@
 
-mod board;
-use board::game::Game;
+use lib::game::Game;
 
 fn main() {
     let s =  "O O

@@ -123,6 +123,42 @@ impl Board {
 
     }
 
+    fn check_left_neighbor(&self, coords : &Coordinates) -> Option<bool>
+    {
+        match coords.0
+        {
+            x if coords.0 > 0 => self.get(&(coords.0 - 1, coords.1)),
+            _ => None
+        }
+    }
+
+    fn check_right_neighbor(&self, coords : &Coordinates) -> Option<bool>
+    {
+        match coords.0
+        {
+            x if (coords.0 as usize) < (self.mgr.size() - 1) => self.get(&(coords.0 + 1, coords.1)),
+            _ => None
+        }
+    }
+
+    fn check_upper_neighbor(&self, coords : &Coordinates) -> Option<bool>
+    {
+        match coords.1
+        {
+            x if coords.1 > 0 => self.get(&(coords.0, coords.1 - 1)),
+            _ => None
+        }
+    }
+
+    fn check_lower_neighbor(&self, coords : &Coordinates) -> Option<bool>
+    {
+        match coords.1
+        {
+            x if (coords.1 as usize) < (self.mgr.size() - 1) => self.get(&(coords.0, coords.1 + 1)),
+            _ => None
+        }
+    }
+
     pub fn get_possible_moves(&self, coords: &Coordinates) -> Vec<Coordinates>
     {
         let mut result = vec![];
@@ -130,80 +166,33 @@ impl Board {
 
         if let Some(v) = self.get(coords) && v // is there really a stick?
         {
-            // function to find a first position in a continuous sequence that has no peg
-            // Except the first peg in that direction. If that has no peg, no move possible
-            let find = |c:  Vec<(u8, u8)>| 
-                if !c.is_empty() && self.get(&c[0]) == Some(false)
-                {
-                    None
-                }
-                else {
-                    c.iter().find_map(|s| 
-                        match self.get(s) { Some(false) => Some(*s), _ => None })                    
-                };
-
-            for x in (0..coords.0).rev()
+            if Some(true) == self.check_left_neighbor(coords) && coords.0 > 1
             {
-                if let Some(peg) = self.get(&(x, coords.1))
-                {
-                    if !peg 
-                    {
-                        if x + 1 == coords.0 
-                        {
-                            break;
-                        }
-                        else {
-                            result.push((x, coords.1));
-                        }
-                    }
-                }
-                else {
-                    break;
-                }
+                let is_empty_position = |x : &u8| Some(false) == self.get(&(*x, coords.1));
+                let add_to_result = |x| result.push((x, coords.1));
+                (0..coords.0 - 1).rev().find(is_empty_position).map(add_to_result);
             }
 
-            // if let Some((x, y)) = found && x + 1 != coords.0
-            // {
-            //     result.push((x, y));
-            // }
-
-            let right_coords = 
-                match coords
-                {
-                    (x , y) if *x < (size - 1) as u8 => (coords.0 + 1..size as u8).map(|x| (x, *y)).collect(),
-                    _ => vec![]
-                };
-
-            let found = find(right_coords);
-
-            if let Some((x, y)) = found && x != coords.0 + 1
+            if Some(true) == self.check_right_neighbor(coords) && (coords.0 as usize) < (size - 1)
             {
-                result.push((x, y));
-            }            
-
-            let up_coords =  (0..coords.1).rev().map(|y| (coords.0, y)).collect();
-
-            let found = find(up_coords);
-
-            if let Some((x, y)) = found && y + 1 != coords.1
-            {
-                result.push((x, y));
+                let is_empty_position = |x : &u8| Some(false) == self.get(&(*x, coords.1));
+                let add_to_result = |x| result.push((x, coords.1));
+                (coords.0 + 1..size as u8).find(is_empty_position).map(add_to_result);
             }
 
-            let down_coords = 
-                match coords
-                {
-                    (x , y) if *y < (size - 1) as u8 => (coords.1 + 1..size as u8).map(|y| (*x, y)).collect(),
-                    _ => vec![]
-                };
-
-            let found = find(down_coords);
-
-            if let Some((x, y)) = found && y != coords.1 + 1
+            if Some(true) == self.check_upper_neighbor(coords) && coords.1 > 1
             {
-                result.push((x, y));
-            }                    
+                let is_empty_position = |y : &u8| Some(false) == self.get(&(coords.0, *y));
+                let add_to_result = |y| result.push((coords.0, y));
+                (0..coords.1 - 1).rev().find(is_empty_position).map(add_to_result);
+            }
 
+            if Some(true) == self.check_lower_neighbor(coords) && (coords.1 as usize) < (size - 1)
+            {
+                let is_empty_position = |y : &u8| Some(false) == self.get(&(coords.0, *y));
+                let add_to_result = |y| result.push((coords.0, y));
+                (coords.1 + 1..size as u8).find(is_empty_position).map(add_to_result);
+            }
         }
 
         result

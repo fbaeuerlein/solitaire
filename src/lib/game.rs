@@ -34,7 +34,7 @@ impl Game {
         }
     }
 
-    fn print(&self, moves: &Vec<Move>)
+    pub fn print(&self, moves: &Vec<Move>)
     {
         println!("Starting with: ");
         self.initial_board.print();

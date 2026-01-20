@@ -16,4 +16,10 @@ criterion = { version = "0.7", features = ["html_reports"] }
 [[bench]]
 name = "benchmark"
 harness = false
+opt-level = 3
 
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3

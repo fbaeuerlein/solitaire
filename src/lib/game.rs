@@ -6,6 +6,11 @@ pub struct Game
 }
 
 impl Game {
+    pub fn new(n : u8) -> Self
+    {
+        Game{ initial_board : Board::default(n)}
+    }
+
     pub fn from_string(s : &str) -> Option<Self>
     {
         Board::from_string(s).map(|b| Game{initial_board : b})

@@ -40,7 +40,17 @@ impl Board {
     pub fn new(board_mgr : Rc<BoardManager>) -> Self
     {
         let n =  board_mgr.n();
-        Board { pos: vec![false; BoardManager::array_size(n) ], mgr: board_mgr}
+        Board { pos: vec![false; BoardManager::array_size(n)], mgr: board_mgr}
+    }
+
+    pub fn default(n : u8) -> Self
+    {
+        let mut v = vec![true; BoardManager::array_size(n)];
+        let index_of_mid = BoardManager::array_size(n) / 2;
+        v[index_of_mid] = false;
+
+        let mgr = Rc::new(BoardManager::new(n));
+        Board{ pos : v, mgr : mgr}
     }
 
     pub fn count_pegs(&self) -> usize
@@ -73,10 +83,7 @@ impl Board {
 
     fn get(&self, coords : &Coordinates) -> Option<bool>
     {
-        match self.mgr.get_index(coords) {
-            Some(idx) => Some(self.pos[idx]),
-            _ => None
-        }
+        self.mgr.get_index(coords).map(|i| self.pos[i])
     }
 
     pub fn set(&mut self, coords : &Coordinates, value: bool) -> bool
@@ -125,38 +132,38 @@ impl Board {
 
     fn check_left_neighbor(&self, coords : &Coordinates) -> Option<bool>
     {
-        match coords.0
+        if coords.0 > 0
         {
-            x if coords.0 > 0 => self.get(&(coords.0 - 1, coords.1)),
-            _ => None
+            return self.get(&(coords.0 - 1, coords.1));
         }
+        None
     }
 
     fn check_right_neighbor(&self, coords : &Coordinates) -> Option<bool>
     {
-        match coords.0
+        if (coords.0 as usize) < (self.mgr.size() - 1)
         {
-            x if (coords.0 as usize) < (self.mgr.size() - 1) => self.get(&(coords.0 + 1, coords.1)),
-            _ => None
+            return self.get(&(coords.0 + 1, coords.1));
         }
+        None
     }
 
     fn check_upper_neighbor(&self, coords : &Coordinates) -> Option<bool>
     {
-        match coords.1
+        if coords.1 > 0
         {
-            x if coords.1 > 0 => self.get(&(coords.0, coords.1 - 1)),
-            _ => None
+            return self.get(&(coords.0, coords.1 - 1)); 
         }
+        None
     }
 
     fn check_lower_neighbor(&self, coords : &Coordinates) -> Option<bool>
     {
-        match coords.1
+        if (coords.1 as usize) < (self.mgr.size() - 1)
         {
-            x if (coords.1 as usize) < (self.mgr.size() - 1) => self.get(&(coords.0, coords.1 + 1)),
-            _ => None
+            return self.get(&(coords.0, coords.1 + 1));
         }
+        None
     }
 
     pub fn get_possible_moves(&self, coords: &Coordinates) -> Vec<Coordinates>
@@ -210,9 +217,12 @@ impl Board {
 
         let mut result = Vec::new();
 
+
         for start in start_coords
         {
-            for end in self.get_possible_moves(start)
+            let moves = self.get_possible_moves(start);
+
+            for end in moves
             {
                 result.push(Move{ start : *start, end : end});
             }

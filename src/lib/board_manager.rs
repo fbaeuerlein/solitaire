@@ -4,11 +4,12 @@ use num_integer::Roots;
 use super::types::{Coordinates, Index};
 use std::{collections::HashMap};
 
+#[derive(Clone)]
 pub struct BoardManager
 {
     n : u8,
     size : usize, 
-    i_to_c_map : HashMap<Index, Coordinates>, 
+    i_to_c_map : Vec<Coordinates>, 
     c_to_i_map : HashMap<Coordinates, Index>
 }
 
@@ -23,7 +24,7 @@ impl BoardManager
         } ;
 
         let array_size = Self::array_size(n);
-        let mut i2c : HashMap<usize, Coordinates> = HashMap::with_capacity(array_size);
+        let mut i2c : Vec<Coordinates> = Vec::new();
         let mut c2i : HashMap<Coordinates, usize> = HashMap::with_capacity(array_size);
 
         // upper 
@@ -32,7 +33,7 @@ impl BoardManager
             for x in (n - 1)..(2*n - 1)
             {
                 let i = i2c.len();
-                i2c.insert(i, (x, y));
+                i2c.push((x, y));
                 c2i.insert((x, y), i);
             }
         }
@@ -44,7 +45,7 @@ impl BoardManager
             for x in 0..size as u8
             {
                 let i = i2c.len();
-                i2c.insert(i, (x, y));
+                i2c.push((x, y));
                 c2i.insert((x, y), i);
             }
         }
@@ -55,7 +56,7 @@ impl BoardManager
             for x in (n - 1)..(2*n - 1)
             {
                 let i = i2c.len();
-                i2c.insert(i, (x, y));
+                i2c.push((x, y));
                 c2i.insert((x, y), i);
             }
         }
@@ -103,7 +104,7 @@ impl BoardManager
 
     pub fn get_coordinate(&self, index : usize) -> Option<&Coordinates>
     {
-        self.i_to_c_map.get(&index)
+        self.i_to_c_map.get(index)
     }
 
     pub fn get_index(&self, coords: &Coordinates) -> Option<usize>

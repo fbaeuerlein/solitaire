@@ -207,7 +207,7 @@ impl Board {
 
     pub fn get_all_possible_moves(&self) -> Vec<Move>
     {
-        let start_coords : Vec<_> = 
+        let pegs : Vec<_> = 
             self.pos.iter().enumerate().filter_map(|(i, peg)| 
                 match peg 
                 { 
@@ -218,7 +218,7 @@ impl Board {
         let mut result = Vec::new();
 
 
-        for start in start_coords
+        for start in pegs
         {
             let moves = self.get_possible_moves(start);
 

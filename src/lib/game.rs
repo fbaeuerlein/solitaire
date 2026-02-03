@@ -1,19 +1,32 @@
 use super::board::{Board, Move};
+use task_pool::{TaskQueue, TaskPool, Fifo};
+
+pub struct SolutionTreeLeaf
+{
+    m : Move,
+    next : Vec<Box<SolutionTreeLeaf>>
+}
+
 
 pub struct Game
 {
     initial_board: Board,
+    task_queue: TaskQueue<Fifo>,
 }
 
 impl Game {
     pub fn new(n : u8) -> Self
     {
-        Game{ initial_board : Board::default(n)}
+        let task_queue = TaskQueue::<Fifo>::default();
+        TaskPool::new(task_queue.clone(), 4).forget();
+        Game{ initial_board : Board::default(n), task_queue : task_queue}
     }
 
     pub fn from_string(s : &str) -> Option<Self>
     {
-        Board::from_string(s).map(|b| Game{initial_board : b})
+        let task_queue = TaskQueue::<Fifo>::default();
+        TaskPool::new(task_queue.clone(), 4).forget();
+        Board::from_string(s).map(|b| Game{initial_board : b, task_queue: task_queue})
     }
 
     pub fn play(&self) -> Option<Vec<Move>>
@@ -74,7 +87,6 @@ impl Game {
             }
             else
             { 
-                // moves.iter().map(|m| self.solve(&n, m)).any(|v| v)
                 for m in moves
                 {
                     let mut v = self.solve(&n, &m);

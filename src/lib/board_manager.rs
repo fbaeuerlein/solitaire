@@ -73,8 +73,7 @@ impl BoardManager
         }
     }
 
-    // 0 = 5n^2 -4n - a
-    // (4 +/- sqrt(16 + 20a))/ 10 
+
     pub fn n_from_array_size(a : usize) -> Option<u8>
     {
         let d = 16 + 20 * a;
